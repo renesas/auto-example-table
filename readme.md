@@ -12,8 +12,9 @@ Add the following to your `.pre-commit-config.yaml`:
 ```yaml
 repos:
   - repo: ssh://git@bitbucket.global.renesas.com:7999/lpc_cs/auto-example-table.git
+    rev: v0.2.0
     hooks:
-      - id: update-example-table
+      - id: auto-example-table
         args:
           - readme.md
 ```

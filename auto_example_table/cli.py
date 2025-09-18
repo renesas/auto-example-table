@@ -1,11 +1,14 @@
-#!/bin/python3
-
 import frontmatter
-import html
 import logging
 import os
 import re
 import subprocess
+from argparse import ArgumentParser
+
+from .html import table, tr, th, td, a, ul, li
+from .consts import *
+
+from html import escape
 
 log = logging.getLogger()
 
@@ -16,21 +19,6 @@ def get_repository_root() -> str:
   )
   return sp.stdout.decode().strip()
 
-MARKER = "EXAMPLE_TABLE"
-ROOT_README = "Readme.md"
-README_FILES = (
-  'README.md',
-  'Readme.md',
-  'readme.md',
-)
-BOARDS = {
-  "da14531_pro": "DA14531 Pro Dev Kit",
-  "da14585_pro": "DA14585 Pro Dev Kit",
-  "da14585_basic": "DA14585 Basic Kit",
-  "da14531_usb": "DA14531 USB Kit",
-  "unknown": "Unknown",
-}
-
 def find_readmes() -> list[str]:
   readmes = []
   for root, _, filenames in os.walk("."):
@@ -38,39 +26,13 @@ def find_readmes() -> list[str]:
       if not filename in README_FILES:
         continue
       full_path = os.path.join(root, filename)
-      if full_path == ROOT_README:
-        continue
       readmes.append(full_path)
   return readmes
-
-def tag(tag: str, *content: str) -> str:
-  return f"<{tag}>{"".join(content)}</{tag.split(" ")[0]}>"
-
-# HTML tag shorthands
-def table(*content: str) -> str:
-  return tag('table', *content)
-def tr(*content: str) -> str:
-  return tag('tr', *content)
-def td(*content: str) -> str:
-  return tag('td', *content)
-def th(*content: str) -> str:
-  return tag('th', *content)
-def ul(*content: str) -> str:
-  return tag('ul', *content)
-def li(*content: str) -> str:
-  return tag('li', *content)
-def a(href: str, *content: str) -> str:
-  return tag(f"a href=\"{html.escape(href)}\"", *content)
 
 def get_github_url(example):
   readme: str = example["path"]
   readme = readme.replace("\\", "/")
-  for name in README_FILES:
-    if not readme.endswith(name):
-      continue
-    readme = readme.replace(name, "")
-    break
-  return readme
+  return os.path.dirname(readme)
 
 def generate_table(examples: list[dict]) -> str:
   # examples must at least have a name
@@ -80,8 +42,7 @@ def generate_table(examples: list[dict]) -> str:
 
   log.info(f"formatting {len(examples)} exapmle{'' if len(examples) == 1 else 's'}")
 
-  output = f"@{MARKER}_BEGIN@\n--->\n"
-  output += table(
+  return table(
     tr(
       th('Module'),
       th('Name'),
@@ -90,18 +51,18 @@ def generate_table(examples: list[dict]) -> str:
     ),
     *[
       tr(
-        td(html.escape(example.get("module", ""))),
-        td(a(get_github_url(example), html.escape(example["name"]))),
+        td(escape(example.get("module", ""))),
+        td(a(get_github_url(example), escape(example["name"]))),
         td(
           ul(
             *[
-              li(BOARDS[board])
+              li(BOARDS.get(board, board))
               for board in example.get("boards", ["unknown"])
             ],
           ),
         ),
         td(
-          html.escape(example.get("description", "")),
+          escape(example.get("description", "")),
           "" if "keywords" not in example else "<br><br>Keywords: ",
           ", ".join(example.get("keywords", [])),
         ),
@@ -109,13 +70,45 @@ def generate_table(examples: list[dict]) -> str:
       for example in examples
     ],
   )
-  output += f"\n<!---\n@{MARKER}_END@"
-  return output
+
+def parse_arguments():
+  parser = ArgumentParser(
+    prog='auto-example-table',
+    description='pre-commit hook to automatically update example overview table'
+  )
+  parser.add_argument(
+    '-q', '--quiet',
+    help="only print critical errors",
+    action="store_const",
+    dest="log_level",
+    default=logging.WARNING,
+    const=logging.CRITICAL,
+  )
+  parser.add_argument(
+    '-v', '--verbose',
+    help="print info messages",
+    action="store_const",
+    dest="log_level",
+    const=logging.INFO,
+  )
+  parser.add_argument(
+    '-m', '--marker',
+    type=str,
+    help="table marker identifier name",
+    default=DEFAULT_MARKER,
+  )
+  parser.add_argument(
+    'readme',
+    help="readme file to update",
+  )
+
+  return parser.parse_args()
 
 def main() -> int:
   ec = 0
+  opts = parse_arguments()
   logging.basicConfig(
-    # level=logging.INFO,
+    level=opts.log_level,
     format="[%(levelname)7s] %(message)s",
   )
 
@@ -123,7 +116,7 @@ def main() -> int:
   os.chdir(repository_root)
   log.info(f"changed into {repository_root}")
 
-  log.info(f"main readme is {ROOT_README}")
+  log.info(f"readme is {opts.readme}")
 
   readmes = find_readmes()
   exapmles = []
@@ -137,10 +130,11 @@ def main() -> int:
       metadata["path"] = readme
       exapmles.append(fm.metadata)
   table = generate_table(exapmles)
-  with open(ROOT_README, "r+") as file:
+  with open(opts.readme, "r+") as file:
     content = file.read()
+    table = f"@{opts.marker}_BEGIN@\n--->\n{table}\n<!---\n@{opts.marker}_END@"
     updated_content = re.sub(
-      f"^@{re.escape(MARKER)}_BEGIN@$.*^@{re.escape(MARKER)}_END@$",
+      f"^@{re.escape(opts.marker)}_BEGIN@$.*^@{re.escape(opts.marker)}_END@$",
       table, content, flags=re.DOTALL | re.MULTILINE
     )
     if content == updated_content:
