@@ -1,0 +1,6 @@
+- id: auto-example-table
+  entry: auto-example-table
+  name: auto-example-table
+  language: python
+  types: [markdown]
+  pass_filenames: false
