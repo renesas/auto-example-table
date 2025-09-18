@@ -1,7 +1,7 @@
 # auto-example-table
 
 This repository contains a [pre-commit][precommit] hook for aggregating a list
-of software examples and automatically updating 
+of software examples and automatically updating a generated table.
 
 [precommit]: https://pre-commit.com
 
