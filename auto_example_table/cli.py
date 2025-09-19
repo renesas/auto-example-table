@@ -74,7 +74,9 @@ def generate_table(examples: list[dict]) -> str:
 def parse_arguments():
   parser = ArgumentParser(
     prog='auto-example-table',
-    description='pre-commit hook to automatically update example overview table'
+    description='pre-commit hook to automatically update example overview table',
+    epilog='''NOTE: this program exits with a non-zero exit code if `readme`
+    was updated in order to be used with pre-commit directly.''',
   )
   parser.add_argument(
     '-q', '--quiet',
@@ -105,6 +107,12 @@ def parse_arguments():
     default=DEFAULT_MARKER,
   )
   parser.add_argument(
+    '-e', '--encoding',
+    type=str,
+    help="repository file encoding",
+    default='utf-8',
+  )
+  parser.add_argument(
     'readme',
     help="readme file to update",
   )
@@ -128,7 +136,7 @@ def main() -> int:
   readmes = find_readmes()
   exapmles = []
   for readme in readmes:
-    with open(readme) as file:
+    with open(readme, encoding=opts.encoding) as file:
       try:
         fm = frontmatter.load(file)
       except Exception as e:
@@ -142,7 +150,7 @@ def main() -> int:
       metadata["path"] = readme
       exapmles.append(fm.metadata)
   table = generate_table(exapmles)
-  with open(opts.readme, "r+") as file:
+  with open(opts.readme, "r+", encoding=opts.encoding) as file:
     content = file.read()
     table = f"@{opts.marker}_BEGIN@\n--->\n{table}\n<!---\n@{opts.marker}_END@"
     updated_content = re.sub(
