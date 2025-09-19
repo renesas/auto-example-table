@@ -92,6 +92,13 @@ def parse_arguments():
     const=logging.INFO,
   )
   parser.add_argument(
+    '-d', '--debug',
+    help="print debug messages",
+    action="store_const",
+    dest="log_level",
+    const=logging.DEBUG,
+  )
+  parser.add_argument(
     '-m', '--marker',
     type=str,
     help="table marker identifier name",
@@ -122,7 +129,12 @@ def main() -> int:
   exapmles = []
   for readme in readmes:
     with open(readme) as file:
-      fm = frontmatter.load(file)
+      try:
+        fm = frontmatter.load(file)
+      except Exception as e:
+        log.warning(f"failed to read {readme}, skipping...")
+        log.debug(e)
+        continue
       metadata = fm.metadata
       if not metadata:
         continue
