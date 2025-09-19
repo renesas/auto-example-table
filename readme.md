@@ -1,18 +1,19 @@
 # auto-example-table
 
-This repository contains a [pre-commit][precommit] hook for aggregating a list
-of software examples and automatically updating a generated table.
+This repository contains a program for aggregating a list of software examples
+and automatically updating a generated table, and a [pre-commit][precommit]
+hook to automate the process of keeping said list up-to-date.
 
 [precommit]: https://pre-commit.com
 
-## Usage
+## Repo setup
 
 Add the following to your `.pre-commit-config.yaml`:
 
 ```yaml
 repos:
   - repo: ssh://git@bitbucket.global.renesas.com:7999/lpc_cs/auto-example-table.git
-    rev: v0.3.0
+    rev: v0.3.1
     hooks:
       - id: auto-example-table
         args:
@@ -37,4 +38,21 @@ AUTOMATICALLY GENERATED CONTENT, DO NOT EDIT!
 
 Content between `@EXAMPLE_TABLE_BEGIN@` and `@EXAMPLE_TABLE_END@` will be
 updated by this hook.
+
+## Example setup
+
+This program recusively scans for markdown readme files (matching names listed
+in [consts.py][consts]) with [front matter][frontmatter].
+The following properties are supported:
+
+|Variable|Type|Description|
+|-|-|-|
+|`name`|`str`|Example **project** name.|
+|`module`|`str`|Example category/subfolder.|
+|`boards`|`list[str]`|A list of supported boards. See `BOARDS` in [consts.py][consts] for a list of board aliases.|
+|`keywords`|`list[str]`|A list of keywords. Appended to the end of the description if present.|
+|`description`|`str`|A short description of the example|
+
+[frontmatter]: https://jekyllrb.com/docs/front-matter
+[consts]: auto_example_table/consts.py
 
