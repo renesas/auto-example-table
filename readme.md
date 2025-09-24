@@ -13,7 +13,7 @@ Add the following to your `.pre-commit-config.yaml`:
 ```yaml
 repos:
   - repo: https://github.com/renesas/auto-example-table
-    rev: v0.3.2
+    rev: v0.4.0
     hooks:
       - id: auto-example-table
         args:
