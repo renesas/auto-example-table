@@ -1,4 +1,8 @@
+from dataclasses import dataclass
+
 DEFAULT_MARKER = "EXAMPLE_TABLE"
+
+SHIELDS = "https://img.shields.io/badge/"
 
 README_FILES = (
   'README.md',
@@ -6,10 +10,22 @@ README_FILES = (
   'readme.md',
 )
 
-BOARDS = {
-  "da14531_pro": "DA14531 Pro Dev Kit",
-  "da14585_pro": "DA14585 Pro Dev Kit",
-  "da14585_basic": "DA14585 Basic Kit",
-  "da14531_usb": "DA14531 USB Kit",
-  "unknown": "Unknown",
+@dataclass
+class Board:
+  soc: str
+  color: str
+  url: str
+
+BOARDS: dict[str, Board] = {
+  "da14531": Board(
+    soc="DA14531",
+    url="https://www.renesas.com/en/products/da14531",
+    color="darkblue",
+  ),
+  "da14585": Board(
+    soc="DA14585",
+    url="https://www.renesas.com/en/products/da14585",
+    color="blue",
+  ),
 }
+

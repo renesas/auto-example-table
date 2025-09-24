@@ -48,7 +48,6 @@ The following properties are supported:
 |Variable|Type|Description|
 |-|-|-|
 |`name`|`str`|Example **project** name.|
-|`module`|`str`|Example category/subfolder.|
 |`boards`|`list[str]`|A list of supported boards. See `BOARDS` in [consts.py][consts] for a list of board aliases.|
 |`keywords`|`list[str]`|A list of keywords. Appended to the end of the description if present.|
 |`description`|`str`|A short description of the example|
