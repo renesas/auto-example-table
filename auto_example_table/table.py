@@ -2,7 +2,7 @@ import os
 from html import escape
 
 from .consts import *
-from .html import table, tr, th, td, a, img
+from .html import table, tr, th, td, a, img, p
 from .log import log
 
 def get_github_url(example):
@@ -62,9 +62,9 @@ def generate_table(examples: list[dict]) -> str:
           valign='top',
         ),
         td(
-          escape(example.get("description", "")),
-          "" if "keywords" not in example else "<br><br>Keywords: ",
-          ", ".join(example.get("keywords", [])),
+          p(escape(example.get("description", ""))),
+          "" if "keywords" not in example else
+          p("Keywords: ", ", ".join(example.get("keywords", []))),
           valign='top',
         ),
       )

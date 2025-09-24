@@ -31,3 +31,6 @@ def a(href: str, *content: str, **attrs: str) -> str:
 def img(src: str, **attrs: str) -> str:
   return tag('img', **attrs, src=src)
 
+def p(*content: str, **attrs: str) -> str:
+  return tag('p', "", *content, **attrs)
+
