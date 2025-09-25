@@ -27,5 +27,15 @@ BOARDS: dict[str, Board] = {
     url="https://www.renesas.com/en/products/da14585",
     color="blue",
   ),
+  "da14592": Board(
+    soc="DA14592",
+    url="https://www.renesas.com/en/products/da14592",
+    color="slategray",
+  ),
+  "da14594": Board(
+    soc="DA14594",
+    url="https://www.renesas.com/en/products/da14594",
+    color="darkslategray",
+  ),
 }
 

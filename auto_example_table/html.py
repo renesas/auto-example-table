@@ -3,7 +3,8 @@ import html
 def tag(name: str, *content: str, **attrs: str) -> str:
   open = " ".join((name, *(f"{key}=\"{html.escape(value)}\"" for key, value in attrs.items()),))
   if len(content) > 0:
-    return f"<{open}>{"".join(content)}</{name}>"
+    inner = "".join(content)
+    return f"<{open}>{inner}</{name}>"
   else:
     return f"<{open}/>"
 
